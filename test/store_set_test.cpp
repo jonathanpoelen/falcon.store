@@ -12,10 +12,11 @@ static_assert(std::is_same<decltype(get<int volatile>(std::declval<store_int_vin
 static_assert(std::is_same<decltype(get<int>(std::declval<store_int_vint const &>())), int const&>::value, "should be int const &");
 static_assert(std::is_same<decltype(get<int volatile >(std::declval<store_int_vint const&>())), int volatile const&>::value, "should be int volatile const &");
 
-static_assert(get<int>(store_int_vint{2,4}) == 2, "should be 2");
-//static_assert(get<int volatile>(store_int_vint{2,4}) == 4, "should be 4");
-static_assert(get<int>(store_int_vint{default_item,4}) == 0, "should be 0");
-static_assert(get<int>(store_int_vint{}) == 0, "should be 0");
+using store_int_long = store<int, long>;
+static_assert(get<int>(store_int_long{2,4}) == 2, "should be 2");
+//static_assert(get<int volatile>(store_int_long{2,4}) == 4, "should be 4");
+static_assert(get<int>(store_int_long{default_item,4}) == 0, "should be 0");
+static_assert(get<int>(store_int_long{}) == 0, "should be 0");
 
 static_assert(std::is_same<decltype(store_int_vint() = store_int_vint()), store_int_vint&>::value, "should be store_int_vint&");
 
