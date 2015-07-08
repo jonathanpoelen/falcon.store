@@ -1,5 +1,6 @@
 #include "falcon/store.hpp"
 #include <type_traits>
+#include <string>
 
 using namespace falcon;
 
@@ -34,4 +35,10 @@ int main(){
     throw 0;
   }
   store = store;
+
+  // -Wmissing-field-initializers
+  {
+    struct XXX { std::string s; };
+    ::store<XXX>{};
+  }
 }

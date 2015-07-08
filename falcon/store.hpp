@@ -42,15 +42,15 @@ namespace detail_ {
   template<class T>
   struct store_item
   {
-    constexpr store_item() noexcept(noexcept(T{}))
-    : x{}
+    constexpr store_item() noexcept(noexcept(T()))
+    : x()
     {}
 
-    constexpr store_item(default_item_t) noexcept(noexcept(T{}))
-    : x{}
+    constexpr store_item(default_item_t) noexcept(noexcept(T()))
+    : x()
     {}
 
-    constexpr store_item(ignore_item_t) noexcept(noexcept(T{}))
+    constexpr store_item(ignore_item_t) noexcept(noexcept(T()))
     {}
 
     template<class U>
