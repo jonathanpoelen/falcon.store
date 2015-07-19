@@ -38,32 +38,42 @@ constexpr struct ignore_item_t {
   constexpr ignore_item_t() noexcept {}
 } ignore_item;
 
-namespace detail_ {
-  template<class T>
-  struct store_item
-  {
-    constexpr store_item() noexcept(noexcept(T()))
-    : x()
-    {}
+template<class T>
+struct store_item
+{
+  constexpr store_item() noexcept(noexcept(T()))
+  : x()
+  {}
 
-    constexpr store_item(default_item_t) noexcept(noexcept(T()))
-    : x()
-    {}
+  constexpr store_item(default_item_t) noexcept(noexcept(T()))
+  : x()
+  {}
 
-    constexpr store_item(ignore_item_t) noexcept(noexcept(T()))
-    {}
+  constexpr store_item(ignore_item_t) noexcept(noexcept(T()))
+  {}
 
-    template<class U>
-    constexpr store_item(U && x_)
-    : x(std::forward<U>(x_))
-    {}
+  template<class U, class = decltype(T{std::declval<U&&>()})>
+  constexpr store_item(U && x_)
+  : x{std::forward<U>(x_)}
+  {}
 
-    T x;
-  };
-}
+  constexpr store_item(T const & x_)
+  : x(x_)
+  {}
+
+  constexpr store_item(T && x_)
+  : x(std::move(x_))
+  {}
+
+  constexpr store_item(T & x_)
+  : x(x_)
+  {}
+
+  T x;
+};
 
 template<class... Ts>
-struct store : detail_::store_item<Ts>... // error: you have defined a store with a type present more than once
+struct store : store_item<Ts>... // error: you have defined a store with a type present more than once
 {
   store() = default;
   store(store &&) = default;
@@ -71,7 +81,7 @@ struct store : detail_::store_item<Ts>... // error: you have defined a store wit
 
   template<class... Us>
   constexpr store(Us && ... elems)
-  : detail_::store_item<Ts>{std::forward<Us>(elems)}...
+  : store_item<Ts>{std::forward<Us>(elems)}...
   {}
 
   store & operator=(store &&) = default;
@@ -80,7 +90,7 @@ struct store : detail_::store_item<Ts>... // error: you have defined a store wit
 
 namespace detail_ {
   template<class... Ts>
-  struct make_strict_store : detail_::store_item<typename std::remove_cv<Ts>::type>... // error: you have defined a store with a type present more than once 
+  struct make_strict_store : ::falcon::store_item<typename std::remove_cv<Ts>::type>... // error: you have defined a store with a type present more than once 
   { using type = ::falcon::store<Ts...>; };
 }
 template<class... Ts>
@@ -88,15 +98,15 @@ using strict_store = typename detail_::make_strict_store<Ts...>::type;
 
 template<class T, class... Ts>
 constexpr T & get(store<Ts...> & store) noexcept
-{ return static_cast<detail_::store_item<T>&>(store).x; }
+{ return static_cast<store_item<T>&>(store).x; }
 
 template<class T, class... Ts>
 constexpr T && get(store<Ts...> && store) noexcept
-{ return std::move(static_cast<detail_::store_item<T>&>(store).x); }
+{ return std::move(static_cast<store_item<T>&>(store).x); }
 
 template<class T, class... Ts>
 constexpr T const & get(store<Ts...> const & store) noexcept
-{ return static_cast<detail_::store_item<T> const &>(store).x; }
+{ return static_cast<store_item<T> const &>(store).x; }
 
 template<class Fn, class... Ts>
 Fn apply_from_store(store<Ts...> const & store, Fn fn)

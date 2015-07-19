@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/jonathanpoelen/falcon.store.svg?branch=master)](https://travis-ci.org/jonathanpoelen/falcon.store)
+
 # Falcon.store
 Store of types with a type present once
 
